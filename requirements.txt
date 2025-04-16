@@ -1,0 +1,4 @@
+google-cloud-bigquery==3.31.0
+google-cloud-logging==3.11.4
+pandas==2.2.3
+PyYAML==6.0.2
