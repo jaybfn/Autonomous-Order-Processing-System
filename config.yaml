@@ -1,7 +1,7 @@
-data_loading:
+master_data_loading:
   csv_file_path: "../data/train/df_master.csv"
   project_id: "prj-g-s-gcloudgerai-e88def70"
-  dataset_id: "ecommerce_dataset"
+  dataset_id: "ecommerce_master_dataset"
   table_id: "masterdata"
   bigquery_location: "EU"  
 cloud_logging:
