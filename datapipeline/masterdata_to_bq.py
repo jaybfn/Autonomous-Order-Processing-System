@@ -172,4 +172,5 @@ if __name__ == "__main__":
     # Load the CSV data to BigQuery
     load_csv_to_bigquery(csv_data, client, project_id, dataset_id, table_id)
 
-    print("Data loading process completed. Check Cloud Logging for details.")
+    print("Data loading process completed")
+    print("Check the logs in Google Cloud Logging for more details.")
