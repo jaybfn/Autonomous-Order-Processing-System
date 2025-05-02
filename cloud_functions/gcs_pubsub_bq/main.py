@@ -4,7 +4,6 @@ from google.cloud import bigquery
 import logging
 import google.cloud.logging
 import os
-# REMOVED: from flask import Flask, request - No longer needed
 from google.cloud import storage
 
 # --- Configuration ---
@@ -201,42 +200,30 @@ def load_json_from_gcs_to_bigquery(event, context):
 
 
         # --- Archive the Processed File ---
-        if ARCHIVE_BUCKET_NAME: # Proceed only if archive bucket is configured
+        if ARCHIVE_BUCKET_NAME:
             source_bucket = storage_client.bucket(bucket_name)
             archive_bucket = storage_client.bucket(ARCHIVE_BUCKET_NAME)
             source_blob = source_bucket.blob(file_name)
 
             if not source_blob.exists():
-                 logger.warning(f"Source file {gcs_uri} not found for archiving. It might have been processed already or deleted.")
-                 # Decide if this is an error or just a warning
-                 return # Exit gracefully if file is already gone
+                logger.warning(f"Source file {gcs_uri} not found for archiving. It might have been processed already or deleted.")
+                return
 
-            destination_blob_name = file_name # Keep the same name in the archive bucket
-            logger.info(f"Attempting to move {gcs_uri} to gs://{ARCHIVE_BUCKET_NAME}/{destination_blob_name}")
+            destination_blob_name = file_name
+            logger.info(f"Moving file {file_name} from {bucket_name} to {ARCHIVE_BUCKET_NAME}")
 
             try:
-                # Option 1: Rewrite (preferred for large files, handles copy across locations/classes)
+                # Copy the blob to the archive bucket
                 new_blob = source_bucket.copy_blob(source_blob, archive_bucket, destination_blob_name)
-                source_blob.delete() # Delete original after successful copy
-                logger.info(f"Successfully copied {file_name} to archive bucket and deleted original.")
-
-                # Option 2: Rename (more efficient if possible: same location, same class)
-                try:
-                    renamed_blob = source_bucket.rename_blob(source_blob, new_name=f"gs://{ARCHIVE_BUCKET_NAME}/{destination_blob_name}")
-                    logger.info(f"Successfully renamed/moved {file_name} to gs://{ARCHIVE_BUCKET_NAME}/{destination_blob_name}")
-                except Exception as rename_err:
-                    logger.warning(f"Rename failed ({rename_err}), falling back to copy/delete.")
-                #     # Fallback logic (copy/delete as above) would go here if needed
-
+                # Delete the blob from the source (staging) bucket
+                source_blob.delete()
+                logger.info(f"Successfully archived {file_name} to gs://{ARCHIVE_BUCKET_NAME}/{destination_blob_name}")
             except Exception as e:
-                error_message = f"Error moving file {file_name} to archive bucket {ARCHIVE_BUCKET_NAME}: {e}"
-                logger.error(error_message)
-                # Decide if failure to archive should fail the function.
-                # Re-raising the error will cause the function execution to fail,
-                # potentially leading to retries of the Pub/Sub message if configured.
+                logger.error(f"Failed to archive file {file_name}: {e}")
                 raise e
         else:
             logger.info("ARCHIVE_BUCKET_NAME not set, skipping file archival.")
+
 
         # --- Successful Execution ---
         logger.info(f"Function execution completed successfully for event ID: {context.event_id}.")
