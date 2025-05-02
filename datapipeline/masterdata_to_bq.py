@@ -159,7 +159,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error initializing BigQuery client: {e}")
         if logger:
-             logger.log_struct({"message": "Failed to initialize BigQuery client", "error": str(e)}, severity="CRITICAL")
+            logger.log_struct({"message": "Failed to initialize BigQuery client", "error": str(e)}, severity="CRITICAL")
         exit(1)
 
     # Check if the dataset exists
