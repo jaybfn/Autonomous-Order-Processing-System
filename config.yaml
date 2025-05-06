@@ -3,6 +3,12 @@ master_data_loading:
   project_id: "mineral-rune-450809-a4"
   dataset_id: "ecommerce_master_dataset"
   table_id: "masterdata"
-  bigquery_location: "EU"  
+  bigquery_location: "EU"
+staging_data_loading:
+  project_id: "mineral-rune-450809-a4"
+  dataset_id: "ecommerce_staging_dataset"
+  table_id: "stagingdata"
+  bigquery_location: "EU"
+  create_dataset: true
 cloud_logging:
   log_name: "bigquery-loader"
